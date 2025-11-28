@@ -1,17 +1,21 @@
-import TaskItem from './TaskItem'
+import TaskItem from "./TaskItem";
 
 const TaskList = ({ tasks, onEdit, onDelete, onStatusChange }) => {
   if (tasks.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 text-center">
-        <p className="text-gray-500">No tasks found. Create your first task!</p>
+      <div className="empty-state">
+        <div className="empty-state-icon">📋</div>
+        <h3 className="empty-state-title">No tasks yet</h3>
+        <p className="empty-state-description">
+          Get started by creating your first task to organize your work
+        </p>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="space-y-4">
-      {tasks.map(task => (
+    <div className="space-y-3">
+      {tasks.map((task) => (
         <TaskItem
           key={task.id}
           task={task}
@@ -21,7 +25,7 @@ const TaskList = ({ tasks, onEdit, onDelete, onStatusChange }) => {
         />
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default TaskList
+export default TaskList;

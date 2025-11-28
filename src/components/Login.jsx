@@ -19,7 +19,7 @@ const Login = () => {
 
     const result = await login(email, password);
 
-    console.log("📝 Login result:", result); // ✅ DEBUG
+    console.log("📝 Login result:", result);
 
     if (!result.success) {
       console.error("❌ Login failed with error:", result.error);
@@ -32,21 +32,8 @@ const Login = () => {
       }
     } else {
       console.log("✅ Login successful, checking auth state...");
-      console.log("📦 User data:", result.data.user);
-      console.log(
-        "🔑 Token:",
-        result.data.access_token ? "Received" : "Missing"
-      );
 
-      // ✅ CEK LOCALSTORAGE
-      const storedUser = localStorage.getItem("user");
-      const storedToken = localStorage.getItem("access_token");
-      console.log("💾 Stored user:", storedUser);
-      console.log("💾 Stored token:", storedToken ? "Exists" : "Missing");
-
-      // ✅ CEK AUTH STATE
       setTimeout(() => {
-        console.log("🕒 After timeout - checking auth again...");
         const currentUser = JSON.parse(localStorage.getItem("user") || "null");
         console.log("👤 Current user in storage:", currentUser);
 
@@ -64,18 +51,24 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
+    <div className="login-container">
+      <div className="login-layout">
+        {/* Left Panel - Login Form */}
+        <div className="login-form-panel">
+          <div className="login-header">
+            <div className="login-logo">
+              <span className="login-logo-icon">🔐</span>
+            </div>
+            <h1 className="login-title">Welcome Back</h1>
+            <p className="login-subtitle">
+              Sign in to continue to your dashboard
+            </p>
+          </div>
+
+          <form className="login-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">
+                Email Address
               </label>
               <input
                 id="email"
@@ -83,14 +76,15 @@ const Login = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                className="input-modern"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
+
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
                 Password
               </label>
               <input
@@ -99,39 +93,85 @@ const Login = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                className="input-modern"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-          </div>
 
-          {errors.general && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              <strong>Error:</strong> {errors.general}
-            </div>
-          )}
+            {/* Error Message */}
+            {errors.general && (
+              <div className="alert-error">
+                <div className="flex items-center space-x-2">
+                  <span>⚠️</span>
+                  <div>
+                    <strong>Error:</strong> {errors.general}
+                  </div>
+                </div>
+              </div>
+            )}
 
-          <div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-            >
-              {isSubmitting ? "Signing in..." : "Sign in"}
+            {/* Submit Button */}
+            <button type="submit" disabled={isSubmitting} className="login-btn">
+              {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                  <div className="loading-spinner-sm mr-3"></div>
+                  Signing in...
+                </div>
+              ) : (
+                "Sign In"
+              )}
             </button>
-          </div>
 
-          <div className="text-center">
-            <Link
-              to="/register"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Don't have an account? Sign up
-            </Link>
+            {/* Register Link */}
+            <div className="register-link">
+              <p className="register-text">
+                Don't have an account?{" "}
+                <Link to="/register" className="register-link-text">
+                  Sign up here
+                </Link>
+              </p>
+            </div>
+          </form>
+        </div>
+
+        {/* Right Panel - Illustration */}
+        <div className="login-illustration-panel">
+          {/* Background Shapes */}
+          <div className="bg-shape bg-shape-1"></div>
+          <div className="bg-shape bg-shape-2"></div>
+          <div className="bg-shape bg-shape-3"></div>
+
+          <div className="illustration-container">
+            <span className="illustration-icon">📊</span>
+            <h2 className="illustration-title">Task Manager Pro</h2>
+            <p className="illustration-subtitle">
+              Manage your tasks efficiently with our powerful task management
+              system. Stay organized and boost your productivity.
+            </p>
+
+            {/* Features Grid */}
+            <div className="features-grid">
+              <div className="feature-item">
+                <span className="feature-icon">📋</span>
+                <div className="feature-text">Task Management</div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">⚡</span>
+                <div className="feature-text">Real-time Updates</div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">🔒</span>
+                <div className="feature-text">Secure & Private</div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">📱</span>
+                <div className="feature-text">Responsive Design</div>
+              </div>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
