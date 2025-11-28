@@ -8,7 +8,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { login, isLoading } = useAuth();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,25 +17,36 @@ const Login = () => {
 
     console.log("🔄 Login process started...");
 
-    const result = await login(email, password);
+    try {
+      const result = await login(email, password);
 
-    console.log("📝 Login result:", result);
+      console.log("📝 Login result:", result);
 
-    if (!result.success) {
-      console.error("❌ Login failed with error:", result.error);
-      if (result.error && typeof result.error === "object") {
-        setErrors(result.error);
-      } else if (result.error) {
-        setErrors({ general: result.error });
+      if (result.success) {
+        console.log("✅ Login successful, forcing redirect...");
+        
+        // SOLUSI PASTI: Force redirect dengan window.location
+        // Tunggu sebentar untuk memastikan state terupdate, lalu redirect
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 100);
+        
       } else {
-        setErrors({ general: "An error occurred during login." });
+        console.error("❌ Login failed with error:", result.error);
+        if (result.error && typeof result.error === "object") {
+          setErrors(result.error);
+        } else if (result.error) {
+          setErrors({ general: result.error });
+        } else {
+          setErrors({ general: "An error occurred during login." });
+        }
+        setIsSubmitting(false);
       }
-    } else {
-      console.log("✅ Login successful, waiting for auth state update...");
-      // Biarkan App.js handle redirect berdasarkan state user
+    } catch (error) {
+      console.error("❌ Login error:", error);
+      setErrors({ general: "An unexpected error occurred." });
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   return (
@@ -68,7 +79,7 @@ const Login = () => {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={isSubmitting || isLoading}
+                disabled={isSubmitting}
               />
             </div>
 
@@ -86,7 +97,7 @@ const Login = () => {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={isSubmitting || isLoading}
+                disabled={isSubmitting}
               />
             </div>
 
@@ -105,7 +116,7 @@ const Login = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isSubmitting || isLoading}
+              disabled={isSubmitting}
               className="login-btn"
             >
               {isSubmitting ? (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 const Register = () => {
@@ -10,7 +10,6 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,23 +22,39 @@ const Register = () => {
       return;
     }
 
-    const result = await register(name, email, password, passwordConfirmation);
+    console.log("🔄 Registration process started...");
 
-    if (!result.success) {
-      if (result.error) {
-        if (typeof result.error === "object") {
-          setErrors(result.error);
-        } else {
-          setErrors({ general: result.error });
-        }
+    try {
+      const result = await register(name, email, password, passwordConfirmation);
+
+      console.log("📝 Registration result:", result);
+
+      if (result.success) {
+        console.log("✅ Registration successful, forcing redirect...");
+        
+        // SOLUSI PASTI: Force redirect dengan window.location
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 100);
+        
       } else {
-        setErrors({ general: "An error occurred during registration." });
+        console.error("❌ Registration failed with error:", result.error);
+        if (result.error) {
+          if (typeof result.error === "object") {
+            setErrors(result.error);
+          } else {
+            setErrors({ general: result.error });
+          }
+        } else {
+          setErrors({ general: "An error occurred during registration." });
+        }
+        setIsSubmitting(false);
       }
-    } else {
-      navigate("/dashboard");
+    } catch (error) {
+      console.error("❌ Registration error:", error);
+      setErrors({ general: "An unexpected error occurred." });
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   // Password strength indicator
@@ -116,6 +131,7 @@ const Register = () => {
                 placeholder="Enter your full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={isSubmitting}
               />
               {errors.name && (
                 <div className="error-message">
@@ -139,6 +155,7 @@ const Register = () => {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
               />
               {errors.email && (
                 <div className="error-message">
@@ -162,6 +179,7 @@ const Register = () => {
                 placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting}
               />
               {password && (
                 <div className="password-strength">
@@ -201,6 +219,7 @@ const Register = () => {
                 placeholder="Confirm your password"
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
+                disabled={isSubmitting}
               />
               {passwordConfirmation && password !== passwordConfirmation && (
                 <div className="error-message">
