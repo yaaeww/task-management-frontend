@@ -97,7 +97,7 @@ const Register = () => {
             <div className="register-logo">
               <span className="register-logo-icon">👤</span>
             </div>
-            <h1 className="register-title">Create Account</h1>
+            <h1 className="text-white">Create Account</h1>
             <p className="register-subtitle">Sign up to start managing your tasks</p>
           </div>
 
