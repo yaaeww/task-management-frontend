@@ -1,92 +1,118 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { authService } from "../services/auth";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = () => {
+  // CHECK AUTH
+  const checkAuth = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
       const token = authService.getToken();
       const userData = authService.getCurrentUser();
 
       if (token && userData) {
-        setUser(userData);
-        console.log("✅ User authenticated:", userData.name);
+        try {
+          await authService.verifyToken();
+          setUser(userData); // valid
+        } catch {
+          authService.clearAuthData();
+          setUser(null);
+        }
       } else {
         setUser(null);
-        console.log("❌ No user authenticated");
       }
+    } catch {
+      authService.clearAuthData();
+      setUser(null);
+    } finally {
       setIsLoading(false);
-    };
-
-    checkAuth();
+    }
   }, []);
 
-  const login = async (email, password) => {
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  // LOGIN
+  const login = useCallback(async (email, password) => {
+    setIsLoading(true);
+
     try {
-      console.log("🔄 Attempting login...");
       const data = await authService.login(email, password);
+
       authService.setAuthData(data.user, data.access_token);
       setUser(data.user);
-      console.log("✅ Login successful:", data.user.name);
+
       return { success: true, data };
-    } catch (error) {
-      console.error("❌ Login failed:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Login failed";
+    } catch (err) {
       return {
         success: false,
-        error: errorMessage,
+        error:
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Login failed",
       };
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, []);
 
-  const register = async (name, email, password, passwordConfirmation) => {
+  // REGISTER
+  const register = useCallback(async (name, email, password, passwordConfirmation) => {
+    setIsLoading(true);
+
     try {
-      console.log("🔄 Attempting registration...");
       const data = await authService.register(
         name,
         email,
         password,
         passwordConfirmation
       );
+
       authService.setAuthData(data.user, data.access_token);
       setUser(data.user);
-      console.log("✅ Registration successful:", data.user.name);
+
       return { success: true, data };
-    } catch (error) {
-      console.error("❌ Registration failed:", error);
-      const errorMessage =
-        error.response?.data?.errors ||
-        error.response?.data?.message ||
-        "Registration failed";
+    } catch (err) {
       return {
         success: false,
-        error: errorMessage,
+        error:
+          err.response?.data?.errors ||
+          err.response?.data?.message ||
+          "Registration failed",
       };
-    }
-  };
-
-  const logout = async () => {
-    try {
-      console.log("🔄 Attempting logout...");
-      await authService.logout();
-      console.log("✅ Logout successful");
-    } catch (error) {
-      console.error("❌ Logout error:", error);
     } finally {
-      authService.clearAuthData();
-      setUser(null);
-      console.log("✅ Auth data cleared");
+      setIsLoading(false);
     }
-  };
+  }, []);
+
+  // LOGOUT
+  const logout = useCallback(async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    try {
+      setUser(null);
+      authService.clearAuthData();
+
+      await authService.logout();
+    } catch {
+      setUser(null);
+      authService.clearAuthData();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }, [isLoggingOut]);
 
   return {
     user,
     isLoading,
+    isLoggingOut,
     login,
     register,
     logout,

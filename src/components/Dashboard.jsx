@@ -5,13 +5,14 @@ import TaskForm from "./TaskForm";
 import TaskList from "./TaskList";
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading: authLoading } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [userDropdown, setUserDropdown] = useState(false);
   const [viewMode, setViewMode] = useState("table"); // 'table' or 'card'
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     loadTasks();
@@ -82,7 +83,23 @@ const Dashboard = () => {
   };
 
   const handleLogout = async () => {
-    await logout();
+    // Prevent multiple clicks
+    if (isLoggingOut || authLoading) {
+      return;
+    }
+
+    console.log("🔄 Starting logout process...");
+    setIsLoggingOut(true);
+
+    try {
+      await logout();
+      console.log("✅ Logout completed successfully");
+      // The AuthContext will handle the state update and App.js will redirect automatically
+    } catch (error) {
+      console.error("❌ Logout failed:", error);
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   // Close dropdown when clicking outside
@@ -97,10 +114,22 @@ const Dashboard = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="loading-spinner"></div>
+        <span className="ml-3 text-text-primary">Loading...</span>
+      </div>
+    );
+  }
+
+  // Show loading while fetching tasks
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="loading-spinner"></div>
+        <span className="ml-3 text-text-primary">Loading tasks...</span>
       </div>
     );
   }
@@ -135,6 +164,7 @@ const Dashboard = () => {
                 <button
                   onClick={() => setUserDropdown(!userDropdown)}
                   className="user-dropdown-trigger"
+                  disabled={isLoggingOut}
                 >
                   <div className="user-avatar">
                     <span className="text-white text-sm font-medium">
@@ -148,7 +178,7 @@ const Dashboard = () => {
                   <svg
                     className={`dropdown-chevron ${
                       userDropdown ? "rotate-180" : ""
-                    }`}
+                    } ${isLoggingOut ? "opacity-50" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -170,25 +200,36 @@ const Dashboard = () => {
                     </div>
 
                     <div className="dropdown-items">
-                      <button onClick={handleLogout} className="logout-btn">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                          />
-                        </svg>
-                        <span>Sign out</span>
+                      <button
+                        onClick={handleLogout}
+                        className="logout-btn"
+                        disabled={isLoggingOut}
+                      >
+                        {isLoggingOut ? (
+                          <div className="flex items-center justify-center">
+                            <div className="loading-spinner-sm mr-3"></div>
+                            <span>Signing out...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                              />
+                            </svg>
+                            <span>Sign out</span>
+                          </>
+                        )}
                       </button>
                     </div>
-
-                    
                   </div>
                 )}
               </div>

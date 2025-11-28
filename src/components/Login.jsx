@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 const Login = () => {
@@ -7,8 +7,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
+
+  const { login, isLoading } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,20 +31,8 @@ const Login = () => {
         setErrors({ general: "An error occurred during login." });
       }
     } else {
-      console.log("✅ Login successful, checking auth state...");
-
-      setTimeout(() => {
-        const currentUser = JSON.parse(localStorage.getItem("user") || "null");
-        console.log("👤 Current user in storage:", currentUser);
-
-        if (currentUser) {
-          console.log("🚀 Redirecting to dashboard...");
-          navigate("/dashboard");
-        } else {
-          console.log("❌ User not found in storage, redirect failed");
-          setErrors({ general: "Authentication failed. Please try again." });
-        }
-      }, 100);
+      console.log("✅ Login successful, waiting for auth state update...");
+      // Biarkan App.js handle redirect berdasarkan state user
     }
 
     setIsSubmitting(false);
@@ -59,7 +47,7 @@ const Login = () => {
             <div className="login-logo">
               <span className="login-logo-icon">🔐</span>
             </div>
-            <h1 className="login-title">Welcome Back</h1>
+            <h1 className="text-white">Welcome Back</h1>
             <p className="login-subtitle">
               Sign in to continue to your dashboard
             </p>
@@ -80,6 +68,7 @@ const Login = () => {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting || isLoading}
               />
             </div>
 
@@ -97,6 +86,7 @@ const Login = () => {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting || isLoading}
               />
             </div>
 
@@ -113,7 +103,11 @@ const Login = () => {
             )}
 
             {/* Submit Button */}
-            <button type="submit" disabled={isSubmitting} className="login-btn">
+            <button
+              type="submit"
+              disabled={isSubmitting || isLoading}
+              className="login-btn"
+            >
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
                   <div className="loading-spinner-sm mr-3"></div>
