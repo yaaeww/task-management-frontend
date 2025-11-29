@@ -11,7 +11,7 @@ const Dashboard = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [userDropdown, setUserDropdown] = useState(false);
-  const [viewMode, setViewMode] = useState("table"); // 'table' or 'card'
+  const [viewMode, setViewMode] = useState("table");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -20,10 +20,13 @@ const Dashboard = () => {
 
   const loadTasks = async () => {
     try {
+      console.log("🔄 Loading tasks from backend...");
       const response = await taskService.getAllTasks();
-      setTasks(response.tasks);
+      console.log("✅ Tasks loaded:", response.tasks);
+      setTasks(response.tasks || []);
     } catch (error) {
-      console.error("Error loading tasks:", error);
+      console.error("❌ Error loading tasks:", error);
+      setTasks([]);
     } finally {
       setLoading(false);
     }
@@ -31,24 +34,28 @@ const Dashboard = () => {
 
   const handleCreateTask = async (taskData) => {
     try {
+      console.log("📝 Creating task:", taskData);
       const response = await taskService.createTask(taskData);
+      console.log("✅ Task created:", response.task);
       setTasks([response.task, ...tasks]);
       setShowForm(false);
     } catch (error) {
-      console.error("Error creating task:", error);
+      console.error("❌ Error creating task:", error);
       throw error;
     }
   };
 
   const handleUpdateTask = async (taskId, taskData) => {
     try {
+      console.log("📝 Updating task:", taskId, taskData);
       const response = await taskService.updateTask(taskId, taskData);
+      console.log("✅ Task updated:", response.task);
       setTasks(
         tasks.map((task) => (task.id === taskId ? response.task : task))
       );
       setEditingTask(null);
     } catch (error) {
-      console.error("Error updating task:", error);
+      console.error("❌ Error updating task:", error);
       throw error;
     }
   };
@@ -59,21 +66,23 @@ const Dashboard = () => {
     }
 
     try {
+      console.log("🗑️ Deleting task:", taskId);
       await taskService.deleteTask(taskId);
       setTasks(tasks.filter((task) => task.id !== taskId));
     } catch (error) {
-      console.error("Error deleting task:", error);
+      console.error("❌ Error deleting task:", error);
     }
   };
 
   const handleStatusChange = async (taskId, status) => {
     try {
+      console.log("🔄 Updating task status:", taskId, status);
       const response = await taskService.updateTaskStatus(taskId, status);
       setTasks(
         tasks.map((task) => (task.id === taskId ? response.task : task))
       );
     } catch (error) {
-      console.error("Error updating task status:", error);
+      console.error("❌ Error updating task status:", error);
     }
   };
 
@@ -83,10 +92,7 @@ const Dashboard = () => {
   };
 
   const handleLogout = async () => {
-    // Prevent multiple clicks
-    if (isLoggingOut || authLoading) {
-      return;
-    }
+    if (isLoggingOut || authLoading) return;
 
     console.log("🔄 Starting logout process...");
     setIsLoggingOut(true);
@@ -94,7 +100,6 @@ const Dashboard = () => {
     try {
       await logout();
       console.log("✅ Logout completed successfully");
-      // The AuthContext will handle the state update and App.js will redirect automatically
     } catch (error) {
       console.error("❌ Logout failed:", error);
     } finally {
@@ -113,6 +118,27 @@ const Dashboard = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Hitung jumlah tasks berdasarkan status - SESUAI BACKEND
+  const getTasksByStatus = (status) => {
+    return tasks.filter((task) => task.status === status).length;
+  };
+
+  const totalTasks = tasks.length;
+  const pendingTasks = getTasksByStatus("pending");
+  const inProgressTasks = getTasksByStatus("in-progress");
+  const completedTasks = getTasksByStatus("completed");
+
+  // Debug info untuk memastikan perhitungan benar
+  useEffect(() => {
+    console.log("📊 Task Statistics:", {
+      total: totalTasks,
+      pending: pendingTasks,
+      inProgress: inProgressTasks,
+      completed: completedTasks,
+      allTasks: tasks,
+    });
+  }, [tasks, totalTasks, pendingTasks, inProgressTasks, completedTasks]);
 
   // Show loading while checking authentication
   if (authLoading) {
@@ -133,14 +159,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
-  const completedTasks = tasks.filter(
-    (task) => task.status === "completed"
-  ).length;
-  const inProgressTasks = tasks.filter(
-    (task) => task.status === "in_progress"
-  ).length;
-  const todoTasks = tasks.filter((task) => task.status === "todo").length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -235,7 +253,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* View Mode Toggle - Moved to right side */}
+            {/* View Mode Toggle */}
             <div className="header-actions">
               <div className="view-toggle">
                 <button
@@ -262,7 +280,7 @@ const Dashboard = () => {
 
       <main className="dashboard-main">
         <div className="container">
-          {/* Stats Overview */}
+          {/* Stats Overview - SESUAI BACKEND */}
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-icon stat-icon-total">
@@ -280,7 +298,7 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <div className="stat-number">{tasks.length}</div>
+              <div className="stat-number">{totalTasks}</div>
               <div className="stat-label">Total Tasks</div>
             </div>
 
@@ -300,8 +318,8 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <div className="stat-number">{todoTasks}</div>
-              <div className="stat-label">To Do</div>
+              <div className="stat-number">{pendingTasks}</div>
+              <div className="stat-label">Pending</div>
             </div>
 
             <div className="stat-card">
@@ -403,7 +421,7 @@ const Dashboard = () => {
                         <tr>
                           <th>Task</th>
                           <th>Status</th>
-                          <th className="hidden md:table-cell">Due Date</th>
+                          <th className="hidden md:table-cell">Deadline</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -427,23 +445,23 @@ const Dashboard = () => {
                                 className={`badge ${
                                   task.status === "completed"
                                     ? "badge-completed"
-                                    : task.status === "in_progress"
+                                    : task.status === "in-progress"
                                     ? "badge-in-progress"
                                     : "badge-todo"
                                 }`}
                               >
                                 {task.status === "completed"
                                   ? "Completed"
-                                  : task.status === "in_progress"
+                                  : task.status === "in-progress"
                                   ? "In Progress"
-                                  : "To Do"}
+                                  : "Pending"}
                               </span>
                             </td>
                             <td className="hidden md:table-cell">
                               <span className="text-xs sm:text-sm text-text-secondary">
-                                {task.due_date
-                                  ? new Date(task.due_date).toLocaleDateString()
-                                  : "No due date"}
+                                {task.deadline
+                                  ? new Date(task.deadline).toLocaleDateString()
+                                  : "No deadline"}
                               </span>
                             </td>
                             <td>
@@ -493,8 +511,8 @@ const Dashboard = () => {
                                   }
                                   className="status-select"
                                 >
-                                  <option value="todo">To Do</option>
-                                  <option value="in_progress">
+                                  <option value="pending">Pending</option>
+                                  <option value="in-progress">
                                     In Progress
                                   </option>
                                   <option value="completed">Completed</option>

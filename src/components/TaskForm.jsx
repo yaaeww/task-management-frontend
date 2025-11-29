@@ -1,194 +1,173 @@
 import { useState, useEffect } from "react";
-import { TASK_STATUS } from "../utils/constants";
 
 const TaskForm = ({ task, onSubmit, onCancel }) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [deadline, setDeadline] = useState("");
-  const [status, setStatus] = useState(TASK_STATUS.PENDING);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    deadline: "",
+    status: "pending",
+  });
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (task) {
-      setTitle(task.title);
-      setDescription(task.description || "");
-      setDeadline(task.deadline ? task.deadline.split("T")[0] : "");
-      setStatus(task.status);
-    } else {
-      resetForm();
+      setFormData({
+        title: task.title || "",
+        description: task.description || "",
+        deadline: task.deadline ? task.deadline.split("T")[0] : "", // Format untuk input date
+        status: task.status || "pending",
+      });
     }
   }, [task]);
 
-  const resetForm = () => {
-    setTitle("");
-    setDescription("");
-    setDeadline("");
-    setStatus(TASK_STATUS.PENDING);
-    setErrors({});
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setLoading(true);
     setErrors({});
 
-    const taskData = {
-      title,
-      description,
-      deadline: deadline || null,
-      status,
-    };
-
     try {
-      if (task) {
-        await onSubmit(task.id, taskData);
-      } else {
-        await onSubmit(taskData);
-      }
-      resetForm();
+      await onSubmit(task?.id, formData);
     } catch (error) {
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
       } else {
-        setErrors({ general: "An error occurred. Please try again." });
+        setErrors({ general: "Something went wrong. Please try again." });
       }
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="task-form-container fade-in">
-      <h3 className="task-form-title">
-        <span>{task ? "✏️" : "➕"}</span>
-        {task ? "Edit Task" : "Create New Task"}
-      </h3>
+    <div className="card fade-in">
+      <div className="card-header">
+        <h3>{task ? "Edit Task" : "Create New Task"}</h3>
+      </div>
+      <div className="card-body">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Title */}
+          <div>
+            <label htmlFor="title" className="form-label">
+              Title *
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className={`form-input ${errors.title ? "form-input-error" : ""}`}
+              placeholder="Enter task title"
+              required
+            />
+            {errors.title && <p className="form-error">{errors.title}</p>}
+          </div>
 
-      <form onSubmit={handleSubmit} className="task-form">
-        <div className="form-group">
-          <label htmlFor="title" className="form-label">
-            Title *
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className={`input-modern ${errors.title ? "input-error" : ""}`}
-            placeholder="Enter task title"
-            required
-          />
-          {errors.title && (
-            <div className="error-message">
-              <span>⚠️</span>
-              {errors.title[0]}
-            </div>
-          )}
-        </div>
+          {/* Description */}
+          <div>
+            <label htmlFor="description" className="form-label">
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="form-textarea"
+              placeholder="Enter task description"
+              rows="3"
+            />
+            {errors.description && (
+              <p className="form-error">{errors.description}</p>
+            )}
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="description" className="form-label">
-            Description
-          </label>
-          <textarea
-            id="description"
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className={`input-modern ${
-              errors.description ? "input-error" : ""
-            }`}
-            placeholder="Enter task description (optional)"
-          />
-          {errors.description && (
-            <div className="error-message">
-              <span>⚠️</span>
-              {errors.description[0]}
-            </div>
-          )}
-        </div>
-
-        <div className="form-grid">
-          <div className="form-group">
+          {/* Deadline */}
+          <div>
             <label htmlFor="deadline" className="form-label">
               Deadline
             </label>
             <input
               type="date"
               id="deadline"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-              className={`input-modern ${errors.deadline ? "input-error" : ""}`}
+              name="deadline"
+              value={formData.deadline}
+              onChange={handleChange}
+              className="form-input"
             />
-            {errors.deadline && (
-              <div className="error-message">
-                <span>⚠️</span>
-                {errors.deadline[0]}
-              </div>
-            )}
+            {errors.deadline && <p className="form-error">{errors.deadline}</p>}
           </div>
 
-          <div className="form-group">
+          {/* Status */}
+          <div>
             <label htmlFor="status" className="form-label">
               Status
             </label>
             <select
               id="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="input-modern"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="form-select"
             >
-              <option value={TASK_STATUS.PENDING}>Pending</option>
-              <option value={TASK_STATUS.IN_PROGRESS}>In Progress</option>
-              <option value={TASK_STATUS.COMPLETED}>Completed</option>
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
             </select>
-            {errors.status && (
-              <div className="error-message">
-                <span>⚠️</span>
-                {errors.status[0]}
-              </div>
-            )}
+            {errors.status && <p className="form-error">{errors.status}</p>}
           </div>
-        </div>
 
-        {errors.general && (
-          <div className="alert-error">
-            <div className="flex items-center space-x-2">
-              <span>⚠️</span>
-              <div>
-                <strong>Error:</strong> {errors.general}
-              </div>
-            </div>
+          {/* General Error */}
+          {errors.general && (
+            <div className="form-error-general">{errors.general}</div>
+          )}
+
+          {/* Form Actions */}
+          <div className="form-actions">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="btn btn-secondary"
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="loading-spinner-sm mr-2"></div>
+                  {task ? "Updating..." : "Creating..."}
+                </div>
+              ) : task ? (
+                "Update Task"
+              ) : (
+                "Create Task"
+              )}
+            </button>
           </div>
-        )}
-
-        <div className="form-actions">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="btn btn-secondary"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="btn btn-primary"
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center">
-                <div className="loading-spinner-sm mr-3"></div>
-                Saving...
-              </div>
-            ) : task ? (
-              "Update Task"
-            ) : (
-              "Create Task"
-            )}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
