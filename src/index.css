@@ -2155,4 +2155,357 @@ h4 {
     grid-template-columns: 1fr;
     box-shadow: none;
   }
+
+  
+}
+
+/* Footer Styles - Updated to Match Your Theme */
+.dashboard-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  margin-top: auto;
+  position: relative;
+  margin-top: 5%;
+}
+
+.dashboard-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  opacity: 0.7;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-logo-small {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-logo-small span {
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.footer-app-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.footer-app-name .text-gradient {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.footer-tagline {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin: 0;
+  font-weight: 400;
+}
+
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.footer-stats {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.footer-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.footer-stat:hover {
+  background: rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.footer-stat-number {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.footer-stat-label {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-copyright {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.footer-tech {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tech-badge {
+  background: var(--surface);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.tech-badge:hover {
+  color: var(--primary);
+  border-color: var(--primary-light);
+  transform: translateY(-1px);
+}
+
+.tech-badge:nth-child(1):hover {
+  color: #61dafb;
+  border-color: #61dafb;
+}
+
+.tech-badge:nth-child(2):hover {
+  color: #ff2d20;
+  border-color: #ff2d20;
+}
+
+.tech-badge:nth-child(3):hover {
+  color: #38b2ac;
+  border-color: #38b2ac;
+}
+
+/* Enhanced hover effects for the entire footer */
+.dashboard-footer:hover::before {
+  opacity: 1;
+}
+
+/* Responsive Design for Footer */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+    padding: 1.25rem 0;
+  }
+
+  .footer-left {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .footer-right {
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .footer-stats {
+    gap: 1rem;
+  }
+
+  .footer-stat {
+    padding: 0.4rem 0.6rem;
+  }
+
+  .footer-stat-number {
+    font-size: 0.9rem;
+  }
+
+  .footer-stat-label {
+    font-size: 0.65rem;
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .footer-tech {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-content {
+    padding: 1rem 0;
+    gap: 1.25rem;
+  }
+
+  .footer-stats {
+    gap: 0.75rem;
+  }
+
+  .footer-stat {
+    padding: 0.35rem 0.5rem;
+    min-width: 70px;
+  }
+
+  .footer-stat-number {
+    font-size: 0.85rem;
+  }
+
+  .footer-stat-label {
+    font-size: 0.6rem;
+  }
+
+  .footer-copyright {
+    font-size: 0.7rem;
+  }
+
+  .tech-badge {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.6rem;
+  }
+
+  .app-logo-small {
+    width: 28px;
+    height: 28px;
+  }
+
+  .footer-app-name {
+    font-size: 0.85rem;
+  }
+
+  .footer-tagline {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .footer-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-stat {
+    width: 100%;
+    max-width: 120px;
+  }
+}
+
+/* Dark mode support for footer */
+@media (prefers-color-scheme: dark) {
+  .dashboard-footer {
+    background: var(--surface);
+    border-top-color: var(--border);
+  }
+
+  .footer-stat {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #374151;
+  }
+
+  .footer-stat:hover {
+    background: rgba(59, 130, 246, 0.15);
+  }
+
+  .tech-badge {
+    background: #1e293b;
+    border-color: #374151;
+    color: #cbd5e1;
+  }
+
+  .tech-badge:hover {
+    background: #334155;
+  }
+
+  .app-logo-small {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Animation for footer stats when updated */
+@keyframes statUpdate {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.footer-stat-update {
+  animation: statUpdate 0.6s ease-in-out;
+}
+
+/* Smooth transitions for all footer elements */
+.dashboard-footer * {
+  transition: all 0.3s ease;
+}
+
+/* Print styles for footer */
+@media print {
+  .dashboard-footer {
+    display: none;
+  }
 }

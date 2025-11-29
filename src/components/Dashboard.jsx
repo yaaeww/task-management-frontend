@@ -161,7 +161,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="dashboard-header">
         <div className="header-container">
@@ -278,7 +278,8 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="dashboard-main">
+      {/* Main Content */}
+      <main className="dashboard-main flex-1">
         <div className="container">
           {/* Stats Overview - SESUAI BACKEND */}
           <div className="stats-grid">
@@ -555,6 +556,51 @@ const Dashboard = () => {
           )}
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="dashboard-footer">
+        <div className="footer-container">
+          <div className="footer-content">
+            <div className="footer-left">
+              <div className="footer-brand">
+                <div className="app-logo-small">
+                  <span className="text-white font-bold text-xs">T</span>
+                </div>
+                <span className="footer-app-name">
+                  Task<span className="text-gradient">Manager</span>
+                </span>
+              </div>
+              <p className="footer-tagline">
+                Manage your tasks efficiently and boost productivity
+              </p>
+            </div>
+            
+            <div className="footer-right">
+              <div className="footer-stats">
+                <div className="footer-stat">
+                  <span className="footer-stat-number">{totalTasks}</span>
+                  <span className="footer-stat-label">Total Tasks</span>
+                </div>
+                <div className="footer-stat">
+                  <span className="footer-stat-number">{completedTasks}</span>
+                  <span className="footer-stat-label">Completed</span>
+                </div>
+              </div>
+              
+              <div className="footer-links">
+                <span className="footer-copyright">
+                  © {new Date().getFullYear()} TaskManager. All rights reserved.
+                </span>
+                <div className="footer-tech">
+                  <span className="tech-badge">React</span>
+                  <span className="tech-badge">Laravel</span>
+                  <span className="tech-badge">Tailwind</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
