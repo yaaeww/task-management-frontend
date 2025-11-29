@@ -83,20 +83,218 @@ h4 {
   font-size: 1rem;
 }
 
-/* Loading Spinner */
-.loading-spinner {
-  border: 2px solid #f1f5f9;
-  border-top: 2px solid var(--primary);
+/* Digital Loading Styles */
+.radar-grid {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-move 20s linear infinite;
+}
+
+@keyframes grid-move {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(50px, 50px);
+  }
+}
+
+/* Digital Airplane Animation */
+.digital-airplane {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.airplane-body {
+  position: relative;
+  width: 80px;
+  height: 30px;
+  background: linear-gradient(90deg, #06b6d4, #3b82f6);
+  border-radius: 8px 15px 15px 8px;
+  transform: perspective(100px) rotateX(15deg);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.6),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+}
+
+.airplane-wing {
+  position: absolute;
+  top: -15px;
+  right: 20px;
+  width: 25px;
+  height: 15px;
+  background: linear-gradient(90deg, #0ea5e9, #6366f1);
+  clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+  transform: rotate(-10deg);
+}
+
+.airplane-tail {
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  width: 15px;
+  height: 12px;
+  background: linear-gradient(90deg, #0284c7, #4f46e5);
+  clip-path: polygon(100% 0%, 0% 50%, 100% 100%);
+}
+
+.digital-trail {
+  position: absolute;
+  top: 50%;
+  left: -60px;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #06b6d4, #3b82f6);
+  animation: trail-glow 1.5s ease-out infinite;
+  filter: blur(1px);
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+@keyframes trail-glow {
+  0% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+}
+
+/* Digital Progress Bar */
+.digital-progress {
+  width: 300px;
+  height: 6px;
+  background: rgba(6, 182, 212, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+  border-radius: 3px;
+  animation: progress-load 2s ease-in-out infinite;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  animation: progress-shine 2s ease-in-out infinite;
+}
+
+@keyframes progress-load {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 70%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes progress-shine {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(300px);
+  }
+}
+
+/* Digital Text Effect */
+.digital-text {
+  font-family: "Courier New", monospace;
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.5), 0 0 20px rgba(6, 182, 212, 0.3);
+  animation: text-flicker 3s ease-in-out infinite;
+}
+
+@keyframes text-flicker {
+  0%,
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(6, 182, 212, 0.5),
+      0 0 20px rgba(6, 182, 212, 0.3);
+  }
+  50% {
+    opacity: 0.9;
+    text-shadow: 0 0 15px rgba(6, 182, 212, 0.7),
+      0 0 25px rgba(6, 182, 212, 0.5), 0 0 35px rgba(6, 182, 212, 0.3);
+  }
+}
+
+/* Digital Dots */
+.digital-dot {
+  width: 8px;
+  height: 8px;
+  background: #06b6d4;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  animation: spin 1s linear infinite;
+  animation: digital-pulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 10px #06b6d4, 0 0 20px #06b6d4;
+}
+
+@keyframes digital-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 10px #06b6d4, 0 0 20px #06b6d4;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+    box-shadow: 0 0 15px #06b6d4, 0 0 30px #06b6d4, 0 0 45px #06b6d4;
+  }
+}
+
+/* Existing spinner styles (keep for other components) */
+.loading-spinner-lg {
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1.5s linear infinite;
 }
 
 .loading-spinner-sm {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-width: 1.5px;
+}
+
+.loading-spinner-xs {
+  width: 12px;
+  height: 12px;
+  border-width: 1px;
 }
 
 @keyframes spin {
@@ -107,7 +305,6 @@ h4 {
     transform: rotate(360deg);
   }
 }
-
 /* Button Styles */
 .btn {
   display: inline-flex;
@@ -318,6 +515,7 @@ h4 {
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  margin-left: 15%;
 }
 
 .app-logo {
@@ -363,6 +561,7 @@ h4 {
   border: 1px solid var(--border);
   background: var(--surface);
   min-width: 0;
+  
 }
 
 .user-dropdown-trigger:hover {
@@ -507,12 +706,12 @@ h4 {
   display: flex;
   justify-content: center; /* Tengah horizontal */
   align-items: center; /* Tengah vertikal */
-  width: 50%;
+  width: 30%;
   padding: 10px 0;
   background: none;
   border: none;
   color: var(--error);
-  font-size: 1.2rem;
+  font-size: 0n5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   margin-left: 50px;
@@ -527,6 +726,7 @@ h4 {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-right: 15%;
 }
 
 .view-toggle {
@@ -536,6 +736,7 @@ h4 {
   border-radius: 6px;
   padding: 2px;
   gap: 2px;
+  
 }
 
 .view-toggle-btn {
@@ -1373,9 +1574,7 @@ h4 {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 8px;
-  
 }
-
 
 .login-subtitle,
 .register-subtitle {
