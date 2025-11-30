@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [userDropdown, setUserDropdown] = useState(false);
   const [viewMode, setViewMode] = useState("table");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     loadTasks();
@@ -20,33 +21,40 @@ const Dashboard = () => {
 
   const loadTasks = async () => {
     try {
+      setError("");
       console.log("🔄 Loading tasks from backend...");
       const response = await taskService.getAllTasks();
       console.log("✅ Tasks loaded:", response.tasks);
       setTasks(response.tasks || []);
     } catch (error) {
       console.error("❌ Error loading tasks:", error);
+      setError("Failed to load tasks. Please try again.");
       setTasks([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateTask = async (taskData) => {
+  // PERBAIKAN: Parameter function harus sesuai dengan TaskForm
+  const handleCreateTask = async (taskId, taskData) => {
     try {
+      setError("");
       console.log("📝 Creating task:", taskData);
       const response = await taskService.createTask(taskData);
       console.log("✅ Task created:", response.task);
       setTasks([response.task, ...tasks]);
       setShowForm(false);
+      return response;
     } catch (error) {
       console.error("❌ Error creating task:", error);
+      setError("Failed to create task. Please check your input.");
       throw error;
     }
   };
 
   const handleUpdateTask = async (taskId, taskData) => {
     try {
+      setError("");
       console.log("📝 Updating task:", taskId, taskData);
       const response = await taskService.updateTask(taskId, taskData);
       console.log("✅ Task updated:", response.task);
@@ -54,8 +62,11 @@ const Dashboard = () => {
         tasks.map((task) => (task.id === taskId ? response.task : task))
       );
       setEditingTask(null);
+      setShowForm(false);
+      return response;
     } catch (error) {
       console.error("❌ Error updating task:", error);
+      setError("Failed to update task. Please try again.");
       throw error;
     }
   };
@@ -66,23 +77,31 @@ const Dashboard = () => {
     }
 
     try {
+      setError("");
       console.log("🗑️ Deleting task:", taskId);
       await taskService.deleteTask(taskId);
       setTasks(tasks.filter((task) => task.id !== taskId));
     } catch (error) {
       console.error("❌ Error deleting task:", error);
+      setError("Failed to delete task. Please try again.");
     }
   };
 
   const handleStatusChange = async (taskId, status) => {
     try {
+      setError("");
       console.log("🔄 Updating task status:", taskId, status);
-      const response = await taskService.updateTaskStatus(taskId, status);
+      
+      // PERBAIKAN: Pastikan status sesuai dengan backend
+      const statusData = { status };
+      const response = await taskService.updateTask(taskId, statusData);
+      
       setTasks(
         tasks.map((task) => (task.id === taskId ? response.task : task))
       );
     } catch (error) {
       console.error("❌ Error updating task status:", error);
+      setError("Failed to update task status. Please try again.");
     }
   };
 
@@ -102,6 +121,7 @@ const Dashboard = () => {
       console.log("✅ Logout completed successfully");
     } catch (error) {
       console.error("❌ Logout failed:", error);
+      setError("Logout failed. Please try again.");
     } finally {
       setIsLoggingOut(false);
     }
@@ -126,7 +146,7 @@ const Dashboard = () => {
 
   const totalTasks = tasks.length;
   const pendingTasks = getTasksByStatus("pending");
-  const inProgressTasks = getTasksByStatus("in-progress");
+  const inProgressTasks = getTasksByStatus("in-progress"); // PERBAIKAN: Sesuai backend
   const completedTasks = getTasksByStatus("completed");
 
   // Debug info untuk memastikan perhitungan benar
@@ -144,18 +164,8 @@ const Dashboard = () => {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="loading-spinner"></div>
+        <div className="loading-spinner-lg"></div>
         <span className="ml-3 text-text-primary">Loading...</span>
-      </div>
-    );
-  }
-
-  // Show loading while fetching tasks
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="loading-spinner"></div>
-        <span className="ml-3 text-text-primary">Loading tasks...</span>
       </div>
     );
   }
@@ -186,12 +196,12 @@ const Dashboard = () => {
                 >
                   <div className="user-avatar">
                     <span className="text-white text-sm font-medium">
-                      {user?.name?.charAt(0)?.toUpperCase()}
+                      {user?.name?.charAt(0)?.toUpperCase() || "U"}
                     </span>
                   </div>
                   <div className="user-info">
-                    <p className="user-name">{user?.name}</p>
-                    <p className="user-email">{user?.email}</p>
+                    <p className="user-name">{user?.name || "User"}</p>
+                    <p className="user-email">{user?.email || "user@example.com"}</p>
                   </div>
                   <svg
                     className={`dropdown-chevron ${
@@ -225,7 +235,7 @@ const Dashboard = () => {
                       >
                         {isLoggingOut ? (
                           <div className="flex items-center justify-center">
-                            <div className="loading-spinner-sm mr-3"></div>
+                            <div className="loading-spinner-sm mr-2"></div>
                             <span>Signing out...</span>
                           </div>
                         ) : (
@@ -281,7 +291,19 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="dashboard-main flex-1">
         <div className="container">
-          {/* Stats Overview - SESUAI BACKEND */}
+          {/* Error Message */}
+          {error && (
+            <div className="alert-error mb-4">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </div>
+            </div>
+          )}
+
+          {/* Stats Overview */}
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-icon stat-icon-total">
@@ -375,6 +397,7 @@ const Dashboard = () => {
                 onClick={() => {
                   setEditingTask(null);
                   setShowForm(true);
+                  setError("");
                 }}
                 className="btn btn-primary"
               >
@@ -396,163 +419,181 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="card">
+              <div className="empty-state">
+                <div className="loading-spinner-lg mx-auto mb-4"></div>
+                <p className="empty-state-description">Loading tasks...</p>
+              </div>
+            </div>
+          )}
+
           {/* Task Form */}
-          {showForm && (
-            <div className="fade-in">
+          {showForm && !loading && (
+            <div className="fade-in mb-6">
               <TaskForm
                 task={editingTask}
                 onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
                 onCancel={() => {
                   setShowForm(false);
                   setEditingTask(null);
+                  setError("");
                 }}
               />
             </div>
           )}
 
           {/* Task Content */}
-          {tasks.length > 0 ? (
-            viewMode === "table" ? (
-              // Table View
-              <div className="card">
-                <div className="card-body p-0">
-                  <div className="table-container">
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th>Task</th>
-                          <th>Status</th>
-                          <th className="hidden md:table-cell">Deadline</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {tasks.map((task) => (
-                          <tr key={task.id}>
-                            <td>
-                              <div>
-                                <div className="font-medium text-text-primary text-sm sm:text-base">
-                                  {task.title}
-                                </div>
-                                {task.description && (
-                                  <div className="text-xs sm:text-sm text-text-secondary mt-1 line-clamp-2">
-                                    {task.description}
+          {!loading && !showForm && (
+            <>
+              {tasks.length > 0 ? (
+                viewMode === "table" ? (
+                  // Table View
+                  <div className="card">
+                    <div className="card-body p-0">
+                      <div className="table-container">
+                        <table className="table">
+                          <thead>
+                            <tr>
+                              <th>Task</th>
+                              <th>Status</th>
+                              <th className="hidden md:table-cell">Deadline</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {tasks.map((task) => (
+                              <tr key={task.id}>
+                                <td>
+                                  <div>
+                                    <div className="font-medium text-text-primary text-sm sm:text-base">
+                                      {task.title}
+                                    </div>
+                                    {task.description && (
+                                      <div className="text-xs sm:text-sm text-text-secondary mt-1 line-clamp-2">
+                                        {task.description}
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
-                            </td>
-                            <td>
-                              <span
-                                className={`badge ${
-                                  task.status === "completed"
-                                    ? "badge-completed"
-                                    : task.status === "in-progress"
-                                    ? "badge-in-progress"
-                                    : "badge-todo"
-                                }`}
-                              >
-                                {task.status === "completed"
-                                  ? "Completed"
-                                  : task.status === "in-progress"
-                                  ? "In Progress"
-                                  : "Pending"}
-                              </span>
-                            </td>
-                            <td className="hidden md:table-cell">
-                              <span className="text-xs sm:text-sm text-text-secondary">
-                                {task.deadline
-                                  ? new Date(task.deadline).toLocaleDateString()
-                                  : "No deadline"}
-                              </span>
-                            </td>
-                            <td>
-                              <div className="task-actions">
-                                <button
-                                  onClick={() => handleEditTask(task)}
-                                  className="task-action-btn"
-                                  title="Edit task"
-                                >
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
+                                </td>
+                                <td>
+                                  <span
+                                    className={`badge ${
+                                      task.status === "completed"
+                                        ? "badge-completed"
+                                        : task.status === "in-progress"
+                                        ? "badge-in-progress"
+                                        : "badge-todo"
+                                    }`}
                                   >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteTask(task.id)}
-                                  className="task-action-btn task-action-btn-danger"
-                                  title="Delete task"
-                                >
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                  </svg>
-                                </button>
-                                <select
-                                  value={task.status}
-                                  onChange={(e) =>
-                                    handleStatusChange(task.id, e.target.value)
-                                  }
-                                  className="status-select"
-                                >
-                                  <option value="pending">Pending</option>
-                                  <option value="in-progress">
-                                    In Progress
-                                  </option>
-                                  <option value="completed">Completed</option>
-                                </select>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                                    {task.status === "completed"
+                                      ? "Completed"
+                                      : task.status === "in-progress"
+                                      ? "In Progress"
+                                      : "Pending"}
+                                  </span>
+                                </td>
+                                <td className="hidden md:table-cell">
+                                  <span className="text-xs sm:text-sm text-text-secondary">
+                                    {task.deadline
+                                      ? new Date(task.deadline).toLocaleDateString()
+                                      : "No deadline"}
+                                  </span>
+                                </td>
+                                <td>
+                                  <div className="task-actions">
+                                    <button
+                                      onClick={() => handleEditTask(task)}
+                                      className="task-action-btn"
+                                      title="Edit task"
+                                    >
+                                      <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                        />
+                                      </svg>
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteTask(task.id)}
+                                      className="task-action-btn task-action-btn-danger"
+                                      title="Delete task"
+                                    >
+                                      <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        />
+                                      </svg>
+                                    </button>
+                                    <select
+                                      value={task.status}
+                                      onChange={(e) =>
+                                        handleStatusChange(task.id, e.target.value)
+                                      }
+                                      className="status-select"
+                                    >
+                                      <option value="pending">Pending</option>
+                                      <option value="in-progress">
+                                        In Progress
+                                      </option>
+                                      <option value="completed">Completed</option>
+                                    </select>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Card View
+                  <TaskList
+                    tasks={tasks}
+                    onEdit={handleEditTask}
+                    onDelete={handleDeleteTask}
+                    onStatusChange={handleStatusChange}
+                  />
+                )
+              ) : (
+                // Empty State
+                <div className="card">
+                  <div className="empty-state">
+                    <div className="empty-state-icon">📋</div>
+                    <h3 className="empty-state-title">No tasks yet</h3>
+                    <p className="empty-state-description">
+                      Get started by creating your first task to organize your work
+                    </p>
+                    <button
+                      onClick={() => {
+                        setShowForm(true);
+                        setError("");
+                      }}
+                      className="btn btn-primary mt-4"
+                    >
+                      Create Task
+                    </button>
                   </div>
                 </div>
-              </div>
-            ) : (
-              // Card View
-              <TaskList
-                tasks={tasks}
-                onEdit={handleEditTask}
-                onDelete={handleDeleteTask}
-                onStatusChange={handleStatusChange}
-              />
-            )
-          ) : (
-            // Empty State
-            <div className="card">
-              <div className="empty-state">
-                <div className="empty-state-icon">📋</div>
-                <h3 className="empty-state-title">No tasks yet</h3>
-                <p className="empty-state-description">
-                  Get started by creating your first task to organize your work
-                </p>
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="btn btn-primary"
-                >
-                  Create Task
-                </button>
-              </div>
-            </div>
+              )}
+            </>
           )}
         </div>
       </main>

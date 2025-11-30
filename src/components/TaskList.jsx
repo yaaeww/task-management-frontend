@@ -1,6 +1,21 @@
 import TaskItem from "./TaskItem";
 
-const TaskList = ({ tasks, onEdit, onDelete, onStatusChange }) => {
+const TaskList = ({
+  tasks,
+  onEdit,
+  onDelete,
+  onStatusChange,
+  loading = false,
+}) => {
+  if (loading) {
+    return (
+      <div className="empty-state">
+        <div className="loading-spinner-lg mx-auto mb-4"></div>
+        <p className="empty-state-description">Loading tasks...</p>
+      </div>
+    );
+  }
+
   if (tasks.length === 0) {
     return (
       <div className="empty-state">
@@ -14,7 +29,7 @@ const TaskList = ({ tasks, onEdit, onDelete, onStatusChange }) => {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {tasks.map((task) => (
         <TaskItem
           key={task.id}
